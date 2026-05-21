@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FORMA — Custom Kit Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg-0:#08080b; --bg-1:#0d0d12; --bg-2:#14141b; --bg-3:#1c1c25;
+    --bg-glass:rgba(20,20,27,.55); --bg-glass-strong:rgba(20,20,27,.78);
+    --hair:rgba(255,255,255,.06); --hair-strong:rgba(255,255,255,.11); --hair-bright:rgba(255,255,255,.18);
+    --ink-0:#f4f4f0; --ink-1:rgba(244,244,240,.62); --ink-2:rgba(244,244,240,.42); --ink-3:rgba(244,244,240,.24);
+    --accent:oklch(0.82 0.2 138); --accent-deep:oklch(0.62 0.18 138);
+    --accent-glow:oklch(0.82 0.2 138/.22); --accent-glow-strong:oklch(0.82 0.2 138/.45);
+    --accent-ink:#0a0e07;
+    --r-xs:6px; --r-sm:8px; --r-md:12px; --r-lg:16px; --r-xl:22px; --r-pill:999px;
+    --f-ui:'Space Grotesk',ui-sans-serif,system-ui,sans-serif;
+    --f-mono:'JetBrains Mono',ui-monospace,monospace;
+    --f-display:'Bebas Neue',sans-serif;
+    --blur-1:10px; --blur-2:20px; --blur-3:32px;
+    --sh-1:0 1px 0 rgba(255,255,255,.04) inset,0 1px 2px rgba(0,0,0,.4);
+    --sh-2:0 1px 0 rgba(255,255,255,.05) inset,0 8px 20px -8px rgba(0,0,0,.55),0 2px 6px rgba(0,0,0,.35);
+    --sh-glass:0 1px 0 rgba(255,255,255,.07) inset,0 0 0 1px rgba(255,255,255,.04),0 22px 50px -20px rgba(0,0,0,.75),0 4px 12px rgba(0,0,0,.4);
+    --ease-out:cubic-bezier(.22,1,.36,1); --ease-spring:cubic-bezier(.34,1.56,.64,1);
+    --t-fast:140ms; --t-med:280ms; --t-slow:520ms;
+    --cx:50%; --cy:45%;
+  }
+  html,body { height:100%; }
+  body {
+    font-family:var(--f-ui); background:var(--bg-0); color:var(--ink-0);
+    overflow:hidden; font-feature-settings:'ss01','cv11';
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  }
+  .mono { font-family:var(--f-mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-2); }
+  .num  { font-family:var(--f-mono); letter-spacing:-.01em; font-variant-numeric:tabular-nums; }
+  button { font-family:inherit; color:inherit; background:none; border:none; cursor:pointer; }
+  input,textarea { font-family:inherit; color:inherit; }
+  input:focus,button:focus,textarea:focus { outline:none; }
+
+  /* ── APP SHELL ── */
+  .app {
+    height:100vh; display:grid;
+    grid-template-rows:56px 1fr;
+    grid-template-columns:var(--sidebar-w,340px) 1fr;
+    grid-template-areas:"topbar topbar" "side stage";
+    background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(255,255,255,.025),transparent 60%),var(--bg-0);
+  }
+  .app[data-sidebar-collapsed="true"] { --sidebar-w:64px; }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    grid-area:topbar; display:flex; align-items:center; padding:0 16px 0 18px;
+    border-bottom:1px solid var(--hair); background:rgba(8,8,11,.7);
+    backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    gap:14px; position:relative; z-index:30; min-width:0; overflow:hidden;
+  }
+  .brand { display:flex; align-items:center; gap:10px; padding-right:14px; border-right:1px solid var(--hair); height:100%; white-space:nowrap; flex-shrink:0; }
+  .brand-mark {
+    width:26px; height:26px; border-radius:7px;
+    background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.18),transparent 60%),linear-gradient(135deg,var(--accent),var(--accent-deep));
+    box-shadow:0 0 0 1px var(--hair-bright),0 4px 14px var(--accent-glow);
+    display:grid; place-items:center; color:var(--accent-ink);
+    font-family:var(--f-display); font-size:16px; letter-spacing:.04em;
+  }
+  .brand-name { font-family:var(--f-display); font-size:19px; letter-spacing:.1em; white-space:nowrap; }
+  .brand-tag {
+    font-family:var(--f-mono); font-size:9.5px; color:var(--ink-2); letter-spacing:.1em;
+    text-transform:uppercase; padding:2px 7px; border:1px solid var(--hair-strong);
+    border-radius:var(--r-pill); white-space:nowrap;
+  }
+  .project-meta { display:flex; align-items:center; gap:10px; color:var(--ink-1); font-size:13px; min-width:0; flex-shrink:1; overflow:hidden; }
+  .project-name {
+    color:var(--ink-0); font-weight:500; padding:4px 8px; border-radius:6px;
+    border:1px solid transparent; background:transparent; width:220px; font-size:13px;
+  }
+  .project-name:hover { background:var(--bg-2); }
+  .project-name:focus { border-color:var(--accent); background:var(--bg-2); }
+  .project-sep { color:var(--ink-3); }
+  .project-status {
+    display:inline-flex; align-items:center; gap:6px;
+    font-family:var(--f-mono); font-size:10.5px; letter-spacing:.08em;
+    color:var(--ink-2); text-transform:uppercase; white-space:nowrap;
+  }
+  .project-status::before { content:""; width:6px; height:6px; border-radius:50%; background:var(--accent); box-shadow:0 0 8px var(--accent-glow); }
+  .top-spacer { flex:1; }
+  .top-actions { display:flex; align-items:center; gap:6px; flex-shrink:0; }
+  .ico-btn {
+    width:32px; height:32px; display:grid; place-items:center;
+    border-radius:8px; color:var(--ink-1); border:1px solid transparent; transition:all .15s ease;
+  }
+  .ico-btn:hover { background:var(--bg-2); color:var(--ink-0); border-color:var(--hair); }
+  .ico-btn:disabled { opacity:.35; cursor:not-allowed; }
+  .ico-btn svg { width:16px; height:16px; stroke-width:1.7; }
+  .top-divider { width:1px; height:20px; background:var(--hair); margin:0 4px; }
+  .btn-ghost {
+    height:32px; padding:0 12px; border-radius:8px; color:var(--ink-1);
+    font-size:12.5px; font-weight:500; border:1px solid var(--hair-strong);
+    background:var(--bg-2); display:inline-flex; align-items:center; gap:7px; transition:all .15s ease;
+  }
+  .btn-ghost:hover { background:var(--bg-3); color:var(--ink-0); border-color:var(--hair-bright); }
+  .btn-ghost svg { width:14px; height:14px; stroke-width:1.7; }
+  .btn-primary {
+    height:32px; padding:0 14px; border-radius:8px; color:var(--accent-ink);
+    font-size:12.5px; font-weight:600;
+    background:linear-gradient(180deg,var(--accent),var(--accent-deep));
+    box-shadow:0 1px 0 rgba(255,255,255,.3) inset,0 0 0 1px rgba(0,0,0,.18) inset,0 6px 18px var(--accent-glow);
+    display:inline-flex; align-items:center; gap:7px;
+    transition:transform var(--t-med) var(--ease-spring),box-shadow var(--t-med) var(--ease-out);
+    position:relative; overflow:hidden;
+  }
+  .btn-primary::before { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(255,255,255,.25),transparent 40%); pointer-events:none; }
+  .btn-primary:hover { transform:translateY(-2px) scale(1.02); box-shadow:0 1px 0 rgba(255,255,255,.3) inset,0 0 0 1px rgba(0,0,0,.18) inset,0 14px 32px var(--accent-glow-strong); }
+  .btn-primary:active { transform:translateY(-1px) scale(1); }
+  .btn-primary svg { width:14px; height:14px; stroke-width:2; }
+  .avatar {
+    width:30px; height:30px; border-radius:50%;
+    background:linear-gradient(135deg,oklch(0.7 0.15 30),oklch(0.5 0.18 320));
+    border:1px solid var(--hair-bright); color:var(--ink-0);
+    display:grid; place-items:center; font-size:11px; font-weight:600; letter-spacing:.02em;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    grid-area:side; border-right:1px solid var(--hair);
+    background:radial-gradient(ellipse 100% 70% at 0% 0%,rgba(255,255,255,.025),transparent 50%),linear-gradient(180deg,var(--bg-1),var(--bg-0));
+    overflow-y:auto; overflow-x:hidden; position:relative;
+    transition:width .25s var(--ease-out); z-index:10;
+  }
+  .sidebar::-webkit-scrollbar { width:8px; }
+  .sidebar::-webkit-scrollbar-track { background:transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background:var(--hair-strong); border-radius:4px; }
+  .sidebar-collapse {
+    position:absolute; top:14px; right:10px; width:26px; height:26px;
+    border-radius:6px; display:grid; place-items:center; color:var(--ink-2);
+    border:1px solid var(--hair); background:var(--bg-2); z-index:3; transition:all .15s ease;
+  }
+  .sidebar-collapse:hover { color:var(--ink-0); border-color:var(--hair-bright); }
+  .sidebar-collapse svg { width:13px; height:13px; }
+  .app[data-sidebar-collapsed="true"] .sidebar-content { opacity:0; pointer-events:none; }
+  .app[data-sidebar-collapsed="true"] .sidebar-rail { opacity:1; pointer-events:auto; }
+  .sidebar-content {
+    padding:22px 18px 80px; display:flex; flex-direction:column; gap:8px;
+    transition:opacity .15s ease;
+  }
+  .sidebar-rail {
+    position:absolute; inset:0; padding:56px 0 0;
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    opacity:0; pointer-events:none; transition:opacity .25s ease;
+  }
+  .sidebar-rail button { width:38px; height:38px; border-radius:9px; display:grid; place-items:center; color:var(--ink-1); transition:all .15s ease; }
+  .sidebar-rail button:hover { background:var(--bg-2); color:var(--ink-0); }
+  .sidebar-rail svg { width:17px; height:17px; stroke-width:1.7; }
+  .stepper { display:flex; align-items:center; gap:6px; padding:4px; background:var(--bg-2); border:1px solid var(--hair); border-radius:10px; margin-bottom:6px; }
+  .stepper-step {
+    flex:1; text-align:center; padding:6px 4px; border-radius:7px;
+    font-family:var(--f-mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--ink-2); transition:all .15s ease; position:relative;
+  }
+  .stepper-step.active { background:var(--bg-3); color:var(--ink-0); box-shadow:var(--sh-1); }
+  .stepper-step:hover { color:var(--ink-0); }
+  .section { border-top:1px solid var(--hair); padding:8px 0; transition:background var(--t-fast) var(--ease-out); }
+  .section:first-of-type { border-top:none; }
+  .section[data-open="true"] { background:linear-gradient(180deg,rgba(255,255,255,.012),transparent 80%); }
+  .section-head {
+    display:flex; align-items:center; gap:10px; width:100%; padding:10px 6px;
+    cursor:pointer; border-radius:8px; transition:background var(--t-fast) var(--ease-out);
+  }
+  .section-head:hover { background:rgba(255,255,255,.035); }
+  .section-head .label { font-family:var(--f-ui); font-size:12.5px; font-weight:500; color:var(--ink-0); letter-spacing:.005em; flex:1; text-align:left; }
+  .section-head .step-num { font-family:var(--f-mono); font-size:10px; color:var(--ink-2); width:18px; letter-spacing:.04em; }
+  .section-head .chev { width:14px; height:14px; color:var(--ink-2); transition:transform .2s ease; }
+  .section[data-open="false"] .chev { transform:rotate(-90deg); }
+  .section-summary { font-family:var(--f-mono); font-size:10px; color:var(--ink-2); margin-right:4px; }
+  .section-body {
+    padding:6px 4px 14px 28px; display:flex; flex-direction:column; gap:12px;
+    overflow:hidden; animation:section-in .42s var(--ease-out); transform-origin:top center;
+  }
+  @keyframes section-in { from{transform:translateY(-4px)} to{transform:translateY(0)} }
+  .section[data-open="false"] .section-body { display:none; }
+  .color-row { display:flex; align-items:center; gap:10px; padding:6px 0; }
+  .color-swatch {
+    width:34px; height:34px; border-radius:9px; position:relative; cursor:pointer;
+    box-shadow:0 0 0 1px var(--hair-strong),0 1px 2px rgba(0,0,0,.5),0 1px 0 rgba(255,255,255,.08) inset;
+    flex-shrink:0; overflow:hidden;
+  }
+  .color-swatch::after { content:""; position:absolute; inset:0; border-radius:inherit; background:linear-gradient(160deg,rgba(255,255,255,.18),transparent 50%); pointer-events:none; }
+  .color-swatch input[type="color"] { position:absolute; inset:-4px; width:calc(100% + 8px); height:calc(100% + 8px); opacity:0; cursor:pointer; border:none; }
+  .color-meta { display:flex; flex-direction:column; gap:1px; flex:1; min-width:0; }
+  .color-meta .name { font-size:12px; color:var(--ink-0); font-weight:500; }
+  .color-meta .hex { font-family:var(--f-mono); font-size:10.5px; color:var(--ink-2); }
+  .preset-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+  .preset {
+    aspect-ratio:1; border-radius:var(--r-md); position:relative; cursor:pointer;
+    border:1.5px solid var(--hair); overflow:hidden;
+    transition:transform var(--t-med) var(--ease-spring),border-color var(--t-fast) var(--ease-out),box-shadow var(--t-med) var(--ease-out);
+  }
+  .preset:hover { transform:translateY(-3px) scale(1.04); border-color:var(--hair-bright); box-shadow:0 12px 24px -8px rgba(0,0,0,.6); }
+  .preset.active { border-color:var(--accent); box-shadow:0 0 0 2px var(--accent-glow); }
+  .preset-fill { position:absolute; inset:0; }
+  .preset-fill .a { position:absolute; inset:0 50% 0 0; }
+  .preset-fill .b { position:absolute; inset:0 0 0 50%; }
+  .preset-fill .c { position:absolute; inset:50% 0 0 0; height:30%; }
+  .preset .name { position:absolute; left:5px; bottom:4px; font-family:var(--f-mono); font-size:9px; color:rgba(255,255,255,.92); text-shadow:0 1px 3px rgba(0,0,0,.7); letter-spacing:.06em; text-transform:uppercase; pointer-events:none; }
+  .chips { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
+  .chip {
+    padding:10px 6px; border-radius:9px; border:1px solid var(--hair); background:var(--bg-2);
+    color:var(--ink-1); font-size:11.5px; font-weight:500; transition:all .15s ease;
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+  }
+  .chip:hover { border-color:var(--hair-bright); color:var(--ink-0); }
+  .chip.active { border-color:var(--accent); background:linear-gradient(180deg,rgba(160,255,120,.06),transparent),var(--bg-3); color:var(--ink-0); box-shadow:0 0 0 1px var(--accent-glow); }
+  .chip-thumb { width:100%; height:26px; border-radius:5px; background:var(--bg-3); position:relative; overflow:hidden; }
+  .field { display:flex; flex-direction:column; gap:6px; }
+  .field .lbl { font-family:var(--f-mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-2); }
+  .field-row { display:grid; grid-template-columns:1fr 80px; gap:8px; }
+  .input { height:36px; padding:0 12px; background:var(--bg-2); border:1px solid var(--hair); border-radius:9px; color:var(--ink-0); font-size:13px; font-family:inherit; transition:all .15s ease; }
+  .input:hover { border-color:var(--hair-bright); }
+  .input:focus { border-color:var(--accent); background:var(--bg-3); box-shadow:0 0 0 3px var(--accent-glow); }
+  .input.center { text-align:center; font-family:var(--f-mono); letter-spacing:.04em; }
+  .fabric-list { display:flex; flex-direction:column; gap:6px; }
+  .fabric { display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; border:1px solid var(--hair); background:var(--bg-2); cursor:pointer; transition:all .15s ease; }
+  .fabric:hover { border-color:var(--hair-bright); }
+  .fabric.active { border-color:var(--accent); background:linear-gradient(180deg,rgba(160,255,120,.04),transparent),var(--bg-3); }
+  .fabric-icon { width:32px; height:32px; border-radius:7px; flex-shrink:0; background:repeating-linear-gradient(45deg,rgba(255,255,255,.06) 0 2px,transparent 2px 5px),var(--bg-3); border:1px solid var(--hair-strong); }
+  .fabric-meta { flex:1; min-width:0; }
+  .fabric-meta .ttl { font-size:12.5px; font-weight:500; color:var(--ink-0); }
+  .fabric-meta .sub { font-family:var(--f-mono); font-size:10px; color:var(--ink-2); letter-spacing:.04em; }
+  .fabric-price { font-family:var(--f-mono); font-size:11px; color:var(--ink-1); }
+  .fabric.active .fabric-price { color:var(--accent); }
+  .typo-row { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
+  .typo-chip { padding:12px 6px; border-radius:9px; border:1px solid var(--hair); background:var(--bg-2); color:var(--ink-1); text-align:center; transition:all .15s ease; cursor:pointer; }
+  .typo-chip:hover { border-color:var(--hair-bright); }
+  .typo-chip.active { border-color:var(--accent); background:var(--bg-3); color:var(--ink-0); box-shadow:0 0 0 1px var(--accent-glow); }
+  .typo-chip .glyph { font-size:20px; line-height:1; letter-spacing:.04em; color:var(--ink-0); }
+  .typo-chip .nm { font-family:var(--f-mono); font-size:9.5px; color:var(--ink-2); margin-top:6px; letter-spacing:.06em; text-transform:uppercase; }
+
+  /* ── STAGE ── */
+  .stage {
+    grid-area:stage; position:relative; overflow:hidden; isolation:isolate;
+    background:radial-gradient(ellipse 70% 50% at 50% 38%,rgba(255,255,255,.05),transparent 55%),radial-gradient(ellipse 90% 70% at 50% 110%,rgba(0,0,0,.55),transparent 60%),linear-gradient(180deg,#16161c 0%,#0c0c11 55%,#06060a 100%);
+  }
+  .stage::before,.stage::after { content:""; position:absolute; inset:0; pointer-events:none; z-index:0; }
+  .stage::before {
+    background:radial-gradient(ellipse 38% 32% at var(--cx) var(--cy),var(--accent-glow),transparent 65%),radial-gradient(ellipse 48% 36% at var(--cx) calc(var(--cy) + 6%),rgba(255,255,255,.08),transparent 60%);
+    filter:blur(8px); transition:background var(--t-med) var(--ease-out); mix-blend-mode:screen; opacity:.95;
+  }
+  .stage::after {
+    background:radial-gradient(circle at 30% 80%,rgba(255,255,255,.04),transparent 22%),radial-gradient(circle at 78% 22%,rgba(255,255,255,.025),transparent 14%),radial-gradient(circle at 12% 30%,rgba(255,255,255,.02),transparent 12%);
+    filter:blur(.4px); opacity:.8; animation:fog-drift 32s linear infinite;
+  }
+  @keyframes fog-drift { 0%{transform:translate3d(0,0,0)} 50%{transform:translate3d(-12px,-8px,0)} 100%{transform:translate3d(0,0,0)} }
+  .stage-floor { position:absolute; left:0; right:0; bottom:0; height:38%; pointer-events:none; z-index:0; background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.4) 60%,rgba(0,0,0,.7) 100%); }
+  .stage-dust { position:absolute; inset:0; pointer-events:none; z-index:0; opacity:.5; mix-blend-mode:screen; }
+  .stage-dust span { position:absolute; width:2px; height:2px; border-radius:50%; background:rgba(255,255,255,.7); box-shadow:0 0 6px rgba(255,255,255,.5); animation:drift 14s linear infinite; opacity:0; }
+  @keyframes drift { 0%{opacity:0;transform:translate3d(0,30px,0)} 15%{opacity:.7} 85%{opacity:.7} 100%{opacity:0;transform:translate3d(20px,-160px,0)} }
+  .stage[data-bg="grid"] {
+    background:radial-gradient(ellipse 60% 50% at 50% 40%,rgba(255,255,255,.04),transparent 60%),linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px) 0 0/36px 36px,linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px) 0 0/36px 36px,#0a0a0e;
+  }
+  .stage[data-bg="spot"] {
+    background:radial-gradient(ellipse 30% 24% at 50% 36%,rgba(255,255,255,.18),transparent 55%),radial-gradient(ellipse 70% 50% at 50% 110%,rgba(0,0,0,.65),transparent 60%),#050507;
+  }
+  .stage[data-bg="mesh"] {
+    background:radial-gradient(circle at 18% 25%,oklch(0.45 0.16 280/.4),transparent 45%),radial-gradient(circle at 82% 30%,oklch(0.55 0.18 30/.3),transparent 50%),radial-gradient(circle at 50% 90%,oklch(0.5 0.15 200/.35),transparent 55%),#08080c;
+  }
+  .corner { position:absolute; z-index:5; font-family:var(--f-mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-2); pointer-events:none; display:flex; align-items:center; gap:8px; white-space:nowrap; }
+  .corner.tl { top:18px; left:22px; } .corner.tr { top:18px; right:22px; }
+  .corner.bl { bottom:18px; left:22px; } .corner.br { bottom:18px; right:22px; }
+  .corner .dot { width:5px; height:5px; border-radius:50%; background:var(--accent); box-shadow:0 0 8px var(--accent-glow); }
+  .corner .v { color:var(--ink-0); }
+  .view-toggle {
+    position:absolute; top:18px; left:50%; transform:translateX(-50%);
+    display:flex; gap:4px; padding:5px;
+    background:var(--bg-glass); backdrop-filter:blur(var(--blur-2)) saturate(140%); -webkit-backdrop-filter:blur(var(--blur-2)) saturate(140%);
+    border:1px solid var(--hair-strong); border-radius:var(--r-pill); box-shadow:var(--sh-glass); z-index:6;
+  }
+  .view-toggle button { padding:7px 16px; border-radius:var(--r-pill); font-size:12px; font-weight:500; color:var(--ink-1); transition:all var(--t-med) var(--ease-out); display:inline-flex; align-items:center; gap:6px; }
+  .view-toggle button:hover { color:var(--ink-0); }
+  .view-toggle button.active { background:var(--ink-0); color:#08080b; box-shadow:0 6px 14px rgba(0,0,0,.45); }
+  .view-toggle svg { width:13px; height:13px; stroke-width:1.8; }
+  .canvas-wrap { position:absolute; inset:0; display:grid; place-items:center; padding:70px 320px 96px 60px; min-height:0; z-index:2; perspective:1600px; }
+  .canvas-shelf { display:flex; align-items:stretch; justify-content:center; gap:36px; position:relative; width:100%; height:100%; max-width:100%; transform-style:preserve-3d; }
+  .canvas-cell { flex:1 1 0; min-width:0; max-width:440px; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; transform:scale(var(--zoom,1)); transform-origin:center 50%; transition:transform var(--t-slow) var(--ease-out); transform-style:preserve-3d; }
+  .canvas-cell.compare { max-width:320px; }
+  .flip-wrap { display:flex; flex-direction:column; align-items:center; justify-content:center; flex:1 1 auto; min-height:0; width:100%; }
+  .canvas-cell.anim-enter .flip-wrap { animation:flip-in .55s var(--ease-out); }
+  @keyframes flip-in { 0%{transform:rotateY(-14deg) translateY(-4px)} 100%{transform:rotateY(0deg) translateY(0)} }
+  .jersey-stage { position:relative; width:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; flex:1 1 auto; min-height:0; animation:breathe 6s ease-in-out infinite; }
+  @keyframes breathe { 0%,100%{transform:translate3d(0,0,0) scale(1)} 50%{transform:translate3d(0,-6px,0) scale(1.012)} }
+  .jersey-stage svg { width:auto; height:auto; max-width:100%; max-height:100%; display:block; overflow:visible; filter:drop-shadow(0 28px 36px rgba(0,0,0,.5)) drop-shadow(0 8px 14px rgba(0,0,0,.35)); }
+  .jersey-aura { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:130%; height:100%; pointer-events:none; background:radial-gradient(ellipse at center,var(--accent-glow-strong),transparent 60%); filter:blur(48px); opacity:.65; z-index:-1; animation:aura-pulse 5s ease-in-out infinite; }
+  @keyframes aura-pulse { 0%,100%{opacity:.5} 50%{opacity:.78} }
+  .jersey-cap { margin-top:18px; font-family:var(--f-mono); font-size:9.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-2); display:flex; align-items:center; justify-content:center; gap:8px; white-space:nowrap; }
+  .jersey-cap .hair { width:24px; height:1px; background:var(--hair-strong); }
+  .floating-toolbar {
+    position:absolute; bottom:22px; left:50%; transform:translateX(-50%);
+    display:flex; align-items:center; gap:4px; padding:6px;
+    background:var(--bg-glass); backdrop-filter:blur(var(--blur-2)) saturate(140%); -webkit-backdrop-filter:blur(var(--blur-2)) saturate(140%);
+    border:1px solid var(--hair-strong); border-radius:var(--r-pill); box-shadow:var(--sh-glass); z-index:6;
+  }
+  .floating-toolbar .tool { width:36px; height:36px; border-radius:var(--r-pill); display:grid; place-items:center; color:var(--ink-1); transition:all .15s ease; }
+  .floating-toolbar .tool:hover { background:rgba(255,255,255,.07); color:var(--ink-0); }
+  .floating-toolbar .tool svg { width:15px; height:15px; stroke-width:1.8; }
+  .floating-toolbar .zoom { padding:0 12px; font-family:var(--f-mono); font-size:11px; color:var(--ink-1); min-width:50px; text-align:center; }
+  .ft-sep { width:1px; height:18px; background:var(--hair-strong); margin:0 3px; }
+  .favorites { position:absolute; right:22px; top:50%; transform:translateY(-50%); display:flex; flex-direction:column; gap:8px; z-index:5; }
+  .fav-card { width:56px; height:72px; border-radius:11px; background:var(--bg-glass); backdrop-filter:blur(var(--blur-2)); border:1px solid var(--hair); box-shadow:var(--sh-glass); padding:6px 5px 0; cursor:pointer; position:relative; overflow:hidden; transition:all var(--t-med) var(--ease-spring); }
+  .fav-card:hover { border-color:var(--hair-bright); transform:translateX(-4px) scale(1.04); }
+  .fav-card.active { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent-glow),var(--sh-2); }
+  .fav-mini { width:100%; height:100%; border-radius:4px; position:relative; }
+  .fav-add { width:56px; height:56px; border-radius:10px; background:var(--bg-glass); backdrop-filter:blur(20px); border:1px dashed var(--hair-strong); color:var(--ink-2); cursor:pointer; display:grid; place-items:center; transition:all .15s ease; }
+  .fav-add:hover { border-color:var(--hair-bright); color:var(--ink-0); }
+  .cta-card {
+    position:absolute; bottom:22px; right:22px; width:290px;
+    background:var(--bg-glass-strong); backdrop-filter:blur(var(--blur-3)) saturate(160%); -webkit-backdrop-filter:blur(var(--blur-3)) saturate(160%);
+    border:1px solid var(--hair-strong); border-radius:var(--r-lg); box-shadow:var(--sh-glass); padding:16px 18px; z-index:6;
+  }
+  .cta-card::before { content:""; position:absolute; inset:0; border-radius:inherit; background:linear-gradient(160deg,rgba(255,255,255,.05),transparent 40%); pointer-events:none; }
+  .cta-card .row { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .size-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0 8px; border-top:1px solid var(--hair); }
+  .size-segs { display:flex; gap:3px; }
+  .size-seg { width:24px; height:24px; border-radius:6px; font-family:var(--f-mono); font-size:10px; border:1px solid var(--hair); background:transparent; color:var(--ink-2); transition:all .12s ease; }
+  .size-seg:hover { color:var(--ink-0); border-color:var(--hair-bright); }
+  .size-seg.active { border-color:var(--accent); background:var(--bg-3); color:var(--ink-0); box-shadow:0 0 0 1px var(--accent-glow); }
+  .cta-card .label { font-family:var(--f-mono); font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-2); }
+  .cta-card .price { font-family:var(--f-display); font-size:28px; color:var(--ink-0); letter-spacing:.02em; line-height:1; }
+  .cta-card .price .cents { font-size:14px; color:var(--ink-1); margin-left:1px; }
+  .cta-card .qty-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:10px 0 12px; }
+  .qty-stepper { display:flex; align-items:center; justify-content:space-between; padding:0 4px; height:32px; border:1px solid var(--hair); border-radius:8px; background:var(--bg-2); }
+  .qty-stepper button { width:24px; height:24px; border-radius:5px; color:var(--ink-1); display:grid; place-items:center; font-size:14px; }
+  .qty-stepper button:hover { background:var(--bg-3); color:var(--ink-0); }
+  .qty-stepper .v { font-family:var(--f-mono); font-size:12px; color:var(--ink-0); min-width:18px; text-align:center; }
+  .size-pill { height:32px; border:1px solid var(--hair); border-radius:8px; background:var(--bg-2); color:var(--ink-0); font-family:var(--f-mono); font-size:11px; padding:0 10px; text-align:left; display:flex; align-items:center; justify-content:space-between; }
+  .size-pill:hover { border-color:var(--hair-bright); }
+  .cta-card .cta-btn {
+    width:100%; height:44px; border-radius:12px;
+    background:linear-gradient(180deg,var(--accent),var(--accent-deep)); color:var(--accent-ink);
+    font-weight:600; font-size:13.5px; letter-spacing:.02em;
+    box-shadow:0 1px 0 rgba(255,255,255,.3) inset,0 0 0 1px rgba(0,0,0,.18) inset,0 10px 28px var(--accent-glow);
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    transition:transform var(--t-med) var(--ease-spring),box-shadow var(--t-med) var(--ease-out);
+    position:relative; overflow:hidden;
+  }
+  .cta-card .cta-btn::before { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(255,255,255,.25),transparent 45%); pointer-events:none; }
+  .cta-card .cta-btn::after { content:""; position:absolute; top:0; left:-120%; width:60%; height:100%; background:linear-gradient(105deg,transparent 0%,rgba(255,255,255,.4) 50%,transparent 100%); pointer-events:none; animation:shine 6.5s ease-in-out infinite; }
+  @keyframes shine { 0%,60%{left:-120%} 100%{left:220%} }
+  .cta-card .cta-btn:hover { transform:translateY(-2px) scale(1.015); box-shadow:0 1px 0 rgba(255,255,255,.3) inset,0 0 0 1px rgba(0,0,0,.18) inset,0 18px 40px var(--accent-glow-strong); }
+  .cta-card .cta-btn:active { transform:translateY(-1px) scale(1); }
+  .cta-card .ship { margin-top:9px; font-family:var(--f-mono); font-size:9.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2); display:flex; align-items:center; gap:6px; }
+  .cta-card .ship svg { width:11px; height:11px; color:var(--accent); }
+  .badges { position:absolute; top:50px; right:22px; display:flex; gap:6px; z-index:5; }
+  .badge { padding:5px 10px; border-radius:var(--r-pill); background:var(--bg-glass); backdrop-filter:blur(16px); border:1px solid var(--hair-strong); font-family:var(--f-mono); font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-1); display:inline-flex; align-items:center; gap:6px; white-space:nowrap; }
+  .badge .b-dot { width:5px; height:5px; border-radius:50%; background:var(--accent); }
+  .hotkeys { position:absolute; bottom:22px; left:22px; display:flex; gap:14px; align-items:center; z-index:5; font-family:var(--f-mono); font-size:10px; letter-spacing:.06em; color:var(--ink-2); }
+  .hotkeys .k { display:inline-flex; align-items:center; gap:4px; }
+  .hotkeys .kbd { display:inline-grid; place-items:center; height:18px; min-width:18px; padding:0 5px; border-radius:4px; border:1px solid var(--hair-strong); background:var(--bg-2); color:var(--ink-1); font-size:9.5px; }
+  .section-head svg { width:14px; height:14px; stroke-width:1.7; }
+
+  @media (max-width:1380px) { .brand-tag{display:none} }
+  @media (max-width:1180px) { .project-name{width:140px} .project-status{display:none} .project-sep{display:none} .badges{display:none} .hotkeys{display:none} .jersey-cap{display:none} }
+  @media (max-width:1100px) { .favorites{display:none} .cta-card{width:240px;padding:12px 13px} .cta-card .price{font-size:22px} .canvas-wrap{padding:70px 280px 96px 40px} }
+  @media (max-width:980px)  { .project-meta{display:none} .canvas-wrap{padding:60px 260px 92px 32px} }
+  @media (max-width:880px)  {
+    .app{grid-template-rows:56px 1fr auto;grid-template-columns:1fr;grid-template-areas:"topbar" "stage" "side"}
+    .sidebar{border-right:none;border-top:1px solid var(--hair);max-height:50vh}
+    .canvas-wrap{padding:60px 24px 200px} .floating-toolbar{transform:translateX(-50%) scale(.92);bottom:130px}
+    .cta-card{width:calc(100% - 44px);right:22px;left:22px;bottom:12px}
+    .hotkeys,.favorites,.badges{display:none}
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useReducer, useCallback, useMemo } = React;
+
+/* ────────────────────────────────────────────────────
+   ICONS
+──────────────────────────────────────────────────── */
+const Icon = {
+  Chevron:     ()=>(<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>),
+  ChevronRight:()=>(<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round"/></svg>),
+  ChevronLeft: ()=>(<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round"/></svg>),
+  Undo:        ()=>(<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 14l-4-4 4-4" strokeLinecap="round" strokeLinejoin="round"/><path d="M5 10h9a5 5 0 0 1 5 5v0a5 5 0 0 1-5 5h-3" strokeLinecap="round" strokeLinejoin="round"/></svg>),
+  Redo:        ()=>(<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 14l4-4-4-4" strokeLinecap="round" strokeLinejoin="round"/><path d="M19 10h-9a5 5 0 0 0-5 5v0a5 5 0 0 0 5 5h3" strokeLinecap="round" strokeLinejoin="round"/></svg>),
+  HeartFill:   ()=>(<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.5-9.5-9.5C.8 8.1 3 4 7 4c2.1 0 3.5 1 5 3 1.5-2 2.9-3 5-3 4 0 6.2 4.1 4.5 7.5C19 16.5 12 21 12 21z"/></svg>),
+  Share:       ()=>(<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.2 11l7.6-4M8.2 13l7.6 4" strokeLinecap="round"/></svg>),
+  Download:    ()=>(<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 4v12m0 0l-4-4m4 4l4-4" strokeLinecap="round" strokeLinejoin="round"/><path d="M5 20h14" strokeLinecap="round"/></svg>),
+  Cart:        ()=>(<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 5h2.5l2.7 11.2a2 2 0 0 0 2 1.5h7.4a2 2 0 0 0 2-1.5L21 9H6.5" strokeLinecap="round" strokeLinejoin="round"/><circle cx="10" cy="20.5" r="1.2" fill="currentColor"/><circle cx="17" cy="20.5" r="1.2" fill="currentColor"/></svg>),
+  Front:       ()=>(<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M8 5l-2 2-3 1 1.5 5L6 13v7h12v-7l1.5.2L21 8l-3-1-2-2c-.6 1.5-2 2.5-4 2.5S8.6 6.5 8 5z" strokeLinejoin="round"/></svg>),
+  Back:        ()=>(<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M8 5l-2 2-3 1 1.5 5L6 13v7h12v-7l1.5.2L21 8l-3-1-2-2" strokeLinejoin="round"/><path d="M9.5 5h5" strokeLinecap="round"/></svg>),
+  Both:        ()=>(<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="8" height="14" rx="1"/><rect x="13" y="5" width="8" height="14" rx="1"/></svg>),
+  Plus:        ()=>(<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 5v14M5 12h14" strokeLinecap="round"/></svg>),
+  Minus:       ()=>(<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 12h14" strokeLinecap="round"/></svg>),
+  Maximize:    ()=>(<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" strokeLinecap="round" strokeLinejoin="round"/></svg>),
+  Rotate:      ()=>(<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 12a8 8 0 0 1 13.7-5.7L20 8.5" strokeLinecap="round"/><path d="M20 4v4.5h-4.5" strokeLinecap="round" strokeLinejoin="round"/><path d="M20 12a8 8 0 0 1-13.7 5.7L4 15.5" strokeLinecap="round"/><path d="M4 20v-4.5h4.5" strokeLinecap="round" strokeLinejoin="round"/></svg>),
+  Save:        ()=>(<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 4h11l3 3v13H5V4z" strokeLinejoin="round"/><path d="M8 4v5h7V4" strokeLinejoin="round"/></svg>),
+  Sparkle:     ()=>(<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 4l1.8 4.5L18 10l-4.2 1.5L12 16l-1.8-4.5L6 10l4.2-1.5L12 4z" strokeLinejoin="round"/></svg>),
+  Truck:       ()=>(<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="7" width="11" height="9" rx="1"/><path d="M13 10h4l3 3v3h-7" strokeLinejoin="round"/><circle cx="6.5" cy="17.5" r="1.5"/><circle cx="17" cy="17.5" r="1.5"/></svg>),
+  Search:      ()=>(<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="6"/><path d="M16 16l4 4" strokeLinecap="round"/></svg>),
+  Bell:        ()=>(<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 9a6 6 0 0 1 12 0v4l1.5 3h-15L6 13V9z" strokeLinejoin="round"/><path d="M10 18a2 2 0 0 0 4 0" strokeLinecap="round"/></svg>),
+  Palette:     ()=>(<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3a9 9 0 1 0 0 18c1 0 1.5-.8 1.5-1.7 0-.8-.5-1.3-.5-2 0-1 .8-1.8 1.8-1.8H17a4 4 0 0 0 4-4 8 8 0 0 0-9-8.5z" strokeLinejoin="round"/><circle cx="7" cy="11" r="1" fill="currentColor"/><circle cx="9.5" cy="7" r="1" fill="currentColor"/><circle cx="14" cy="6.5" r="1" fill="currentColor"/><circle cx="17" cy="10" r="1" fill="currentColor"/></svg>),
+  Wand:        ()=>(<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 20l12-12" strokeLinecap="round"/><path d="M16 4l1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2z" strokeLinejoin="round"/></svg>),
+  Text:        ()=>(<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 6h14M12 6v13M9 19h6" strokeLinecap="round"/></svg>),
+  Fabric:      ()=>(<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4l16 16M4 9l11 11M4 14l6 6M9 4l11 11M14 4l6 6" strokeLinecap="round"/></svg>),
+  Zap:         ()=>(<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M13 3L5 14h6l-1 7 8-11h-6l1-7z" strokeLinejoin="round"/></svg>),
+  Eye:         ()=>(<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z" strokeLinejoin="round"/><circle cx="12" cy="12" r="3"/></svg>),
+};
+
+/* ────────────────────────────────────────────────────
+   APP DATA
+──────────────────────────────────────────────────── */
+const PRESETS = [
+  { name:"Argentina", body:"#5FA3D9", sleeves:"#FFFFFF", collar:"#5FA3D9", shorts:"#181C5C" },
+  { name:"Brasil",    body:"#00A445", sleeves:"#00A445", collar:"#FCE400", shorts:"#002776" },
+  { name:"Boca",      body:"#0E2A6E", sleeves:"#F5C518", collar:"#0E2A6E", shorts:"#0E2A6E" },
+  { name:"River",     body:"#F0F0F0", sleeves:"#CC0033", collar:"#F0F0F0", shorts:"#EEEEEE" },
+  { name:"Carbon",    body:"#1A1A1F", sleeves:"#0A0A0C", collar:"#1A1A1F", shorts:"#0A0A0C" },
+  { name:"Lime",      body:"#1A1A1F", sleeves:"#1A1A1F", collar:"#B8FF5E", shorts:"#0A0A0C" },
+  { name:"Sunset",    body:"#FF5A36", sleeves:"#FFB347", collar:"#2A1B5C", shorts:"#2A1B5C" },
+  { name:"Mint",      body:"#A3E4B7", sleeves:"#0F2A28", collar:"#0F2A28", shorts:"#0F2A28" },
+  { name:"Cobalt",    body:"#1A4FD9", sleeves:"#0F2D7A", collar:"#FFFFFF", shorts:"#0F2D7A" },
+  { name:"Sangre",    body:"#9B1228", sleeves:"#5C0511", collar:"#F0E5C7", shorts:"#5C0511" },
+  { name:"Pitch",     body:"#000000", sleeves:"#B8FF5E", collar:"#000000", shorts:"#000000" },
+  { name:"Cream",     body:"#F0E5C7", sleeves:"#7A5230", collar:"#7A5230", shorts:"#3A2410" },
+];
+
+const FABRICS = [
+  { id:"drypique", name:"Dry Piqué",    sub:"180g · transpirable",    price:"+$0" },
+  { id:"mesh",     name:"Air Mesh",     sub:"150g · ultra-ventilado", price:"+$1.500" },
+  { id:"sublim",   name:"Sublimada Pro",sub:"200g · estampa total",   price:"+$3.200" },
+  { id:"premium",  name:"Tech Premium", sub:"210g · alta gama",       price:"+$5.800" },
+];
+
+const JERSEY_FONTS = [
+  { id:"bebas",   nm:"BEBAS",   stack:'"Bebas Neue", sans-serif',    glyph:"F9" },
+  { id:"grotesk", nm:"GROTESK", stack:'"Space Grotesk", sans-serif', glyph:"F9" },
+  { id:"mono",    nm:"MONO",    stack:'"JetBrains Mono", monospace', glyph:"F9" },
+];
+
+const STYLES = [
+  { id:"classic",      name:"Liso",      desc:"color full" },
+  { id:"stripes-v",    name:"Rayas V",   desc:"verticales" },
+  { id:"stripes-h",    name:"Rayas H",   desc:"horizontales" },
+  { id:"stripes-thin", name:"Pinstripe", desc:"finas" },
+  { id:"sash",         name:"Banda",     desc:"diagonal" },
+  { id:"gradient",     name:"Degradé",   desc:"top-bottom" },
+];
+
+const SIZES = ["XS","S","M","L","XL","XXL"];
+
+const INITIAL_DESIGN = {
+  colors:{ body:"#0E2A6E", sleeves:"#F5C518", collar:"#0E2A6E", shorts:"#0E2A6E" },
+  textColor:"#FFFFFF", style:"classic", fabric:"drypique",
+  jerseyFont:"bebas", name:"MESSI", number:"10", size:"L", qty:1,
+};
+
+const DEFAULT_FAVS = [
+  { name:"Boca",  design:{ ...INITIAL_DESIGN, colors:{ body:"#0E2A6E", sleeves:"#F5C518", collar:"#0E2A6E", shorts:"#0E2A6E" }, name:"RIQUELME", number:"10" }},
+  { name:"Lime",  design:{ ...INITIAL_DESIGN, colors:{ body:"#1A1A1F", sleeves:"#1A1A1F", collar:"#B8FF5E", shorts:"#0A0A0C" }, name:"FORMA",    number:"01" }},
+  { name:"Pitch", design:{ ...INITIAL_DESIGN, colors:{ body:"#000000", sleeves:"#B8FF5E", collar:"#000000", shorts:"#000000" }, name:"GHOST",    number:"99" }},
+];
+
+/* ────────────────────────────────────────────────────
+   UNDO/REDO REDUCER
+──────────────────────────────────────────────────── */
+function designReducer(state, action) {
+  switch (action.type) {
+    case "SET": {
+      const next = { ...state.present, ...action.payload };
+      return { past:[...state.past, state.present].slice(-30), present:next, future:[] };
+    }
+    case "SET_COLOR": {
+      const next = { ...state.present, colors:{ ...state.present.colors, [action.zone]:action.color } };
+      return { past:[...state.past, state.present].slice(-30), present:next, future:[] };
+    }
+    case "APPLY_PRESET": {
+      const p = action.preset;
+      const next = { ...state.present, colors:{ body:p.body, sleeves:p.sleeves, collar:p.collar, shorts:p.shorts } };
+      return { past:[...state.past, state.present].slice(-30), present:next, future:[] };
+    }
+    case "UNDO": {
+      if (!state.past.length) return state;
+      const prev = state.past[state.past.length-1];
+      return { past:state.past.slice(0,-1), present:prev, future:[state.present,...state.future] };
+    }
+    case "REDO": {
+      if (!state.future.length) return state;
+      const next = state.future[0];
+      return { past:[...state.past, state.present], present:next, future:state.future.slice(1) };
+    }
+    case "REPLACE":
+      return { past:[...state.past, state.present].slice(-30), present:action.design, future:[] };
+    default: return state;
+  }
+}
+
+/* ────────────────────────────────────────────────────
+   JERSEY COMPONENT — PNG renders de Blender con
+   colorización por SVG filters (feFlood multiply)
+──────────────────────────────────────────────────── */
+function Jersey({ view="front", colors, style, idPrefix, name, number, textColor, jerseyFont }) {
+  const p = idPrefix + "-";
+  const isBack = view === "back";
+  const imgSrc = isBack ? "jersey_dorso.png" : "jersey_frente.png";
+
+  // Clip paths (evenodd excluye mangas del torso)
+  const clipTorsoFront = "M132,82 L102,102 L58,124 L36,186 L80,198 L80,395 L320,395 L320,198 L364,186 L342,124 L298,102 L268,82 C258,103 240,118 200,118 C160,118 142,103 132,82 Z M132,82 C122,88 110,95 102,102 L58,124 L36,186 L80,198 L80,142 L118,112 C120,102 126,92 132,82 Z M268,82 C274,92 280,102 282,112 L320,142 L320,198 L364,186 L342,124 L298,102 C290,95 278,88 268,82 Z";
+  const clipTorsoBack  = "M132,82 L102,102 L58,124 L36,186 L80,198 L80,395 L320,395 L320,198 L364,186 L342,124 L298,102 L268,82 C258,78 240,74 200,74 C160,74 142,78 132,82 Z M132,82 C122,88 110,95 102,102 L58,124 L36,186 L80,198 L80,142 L118,112 C120,102 126,92 132,82 Z M268,82 C274,92 280,102 282,112 L320,142 L320,198 L364,186 L342,124 L298,102 C290,95 278,88 268,82 Z";
+  const clipTorso = isBack ? clipTorsoBack : clipTorsoFront;
+
+  const clipCollarFront = "M157,82 C162,98 178,111 200,113 C222,111 238,98 243,82 C233,76 218,72 200,72 C182,72 167,76 157,82 Z";
+  const clipCollarBack  = "M162,82 C168,92 182,99 200,100 C218,99 232,92 238,82 C228,78 215,76 200,76 C185,76 172,78 162,82 Z";
+  const clipCollar = isBack ? clipCollarBack : clipCollarFront;
+
+  const bodyOutline = isBack
+    ? "M132,82 L102,102 L58,124 L36,186 L80,198 L80,395 L320,395 L320,198 L364,186 L342,124 L298,102 L268,82 C258,78 240,74 200,74 C160,74 142,78 132,82 Z"
+    : "M132,82 L102,102 L58,124 L36,186 L80,198 L80,395 L320,395 L320,198 L364,186 L342,124 L298,102 L268,82 C258,103 240,118 200,118 C160,118 142,103 132,82 Z";
+
+  const stylePatternFill =
+    style === "stripes-v"    ? `url(#${p}sv)` :
+    style === "stripes-h"    ? `url(#${p}sh)` :
+    style === "stripes-thin" ? `url(#${p}st)` :
+    style === "sash"         ? `url(#${p}ss)` :
+    style === "gradient"     ? `url(#${p}sg)` : "none";
+
+  return (
+    <div className="jersey-stage">
+      <div className="jersey-aura"/>
+      <svg viewBox="0 0 400 480" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          {/* Sombra drop shadow */}
+          <filter id={p+"shadow"} x="-30%" y="-10%" width="160%" height="135%">
+            <feDropShadow dx="0" dy="22" stdDeviation="22" floodColor="#000" floodOpacity="0.55"/>
+          </filter>
+          <filter id={p+"blur-md"} x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur stdDeviation="14"/>
+          </filter>
+
+          {/* Filtros de colorización por zona */}
+          <filter id={p+"fb"} colorInterpolationFilters="sRGB" x="-5%" y="-5%" width="110%" height="110%">
+            <feColorMatrix type="saturate" values="0" result="gray"/>
+            <feFlood floodColor={colors.body} result="flood"/>
+            <feBlend in="flood" in2="gray" mode="multiply" result="blended"/>
+            <feComposite in="blended" in2="SourceGraphic" operator="in"/>
+          </filter>
+          <filter id={p+"fs"} colorInterpolationFilters="sRGB" x="-5%" y="-5%" width="110%" height="110%">
+            <feColorMatrix type="saturate" values="0" result="gray"/>
+            <feFlood floodColor={colors.sleeves} result="flood"/>
+            <feBlend in="flood" in2="gray" mode="multiply" result="blended"/>
+            <feComposite in="blended" in2="SourceGraphic" operator="in"/>
+          </filter>
+          <filter id={p+"fc"} colorInterpolationFilters="sRGB" x="-5%" y="-5%" width="110%" height="110%">
+            <feColorMatrix type="saturate" values="0" result="gray"/>
+            <feFlood floodColor={colors.collar} result="flood"/>
+            <feBlend in="flood" in2="gray" mode="multiply" result="blended"/>
+            <feComposite in="blended" in2="SourceGraphic" operator="in"/>
+          </filter>
+
+          {/* Clip paths de zona */}
+          <clipPath id={p+"ct"}>
+            <path clipRule="evenodd" d={clipTorso}/>
+          </clipPath>
+          <clipPath id={p+"cc"}>
+            <path d={clipCollar}/>
+          </clipPath>
+
+          {/* Shorts shading */}
+          <radialGradient id={p+"shao"} cx="50%" cy="20%" r="90%">
+            <stop offset="0%"   stopColor="white"/>
+            <stop offset="70%"  stopColor="#A8A8A8"/>
+            <stop offset="100%" stopColor="#666"/>
+          </radialGradient>
+
+          {/* Patrones de estilo */}
+          <pattern id={p+"sv"} patternUnits="userSpaceOnUse" width="32" height="400">
+            <rect width="16" height="400" fill="white" fillOpacity="0.18"/>
+          </pattern>
+          <pattern id={p+"sh"} patternUnits="userSpaceOnUse" width="400" height="32">
+            <rect width="400" height="16" fill="white" fillOpacity="0.18"/>
+          </pattern>
+          <pattern id={p+"st"} patternUnits="userSpaceOnUse" width="14" height="400">
+            <rect width="3" height="400" fill="white" fillOpacity="0.22"/>
+          </pattern>
+          <linearGradient id={p+"ss"} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%"    stopColor="white" stopOpacity="0"/>
+            <stop offset="42%"   stopColor="white" stopOpacity="0"/>
+            <stop offset="42.5%" stopColor="white" stopOpacity="0.22"/>
+            <stop offset="57.5%" stopColor="white" stopOpacity="0.22"/>
+            <stop offset="58%"   stopColor="white" stopOpacity="0"/>
+            <stop offset="100%"  stopColor="white" stopOpacity="0"/>
+          </linearGradient>
+          <linearGradient id={p+"sg"} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stopColor="white" stopOpacity="0.22"/>
+            <stop offset="100%" stopColor="black" stopOpacity="0.22"/>
+          </linearGradient>
+        </defs>
+
+        {/* Sombra de piso */}
+        <ellipse cx="200" cy="458" rx="140" ry="15" fill="black" fillOpacity="0.45" filter={`url(#${p}blur-md)`}/>
+
+        <g filter={`url(#${p}shadow)`}>
+          <g style={{isolation:"isolate"}}>
+
+            {/* Pantalón / Shorts (rectángulo sintético debajo de la camiseta) */}
+            <rect x="98" y="392" width="204" height="68" rx="5" fill={colors.shorts}/>
+            <g style={{mixBlendMode:"multiply", pointerEvents:"none"}}>
+              <rect x="98" y="392" width="204" height="68" rx="5" fill={`url(#${p}shao)`}/>
+            </g>
+            <line x1="200" y1="392" x2="200" y2="460" stroke="white" strokeWidth="1.2" strokeOpacity="0.12" pointerEvents="none"/>
+            <rect x="98" y="392" width="204" height="3" fill="black" fillOpacity="0.18" pointerEvents="none"/>
+
+            {/* ① MANGAS — PNG completo sin clip (alpha define forma de las mangas) */}
+            <image href={imgSrc} x="5" y="38" width="390" height="390"
+              filter={`url(#${p}fs)`}
+              preserveAspectRatio="xMidYMid meet" pointerEvents="none"/>
+
+            {/* ② TORSO — evenodd excluye zona de mangas */}
+            <image href={imgSrc} x="5" y="38" width="390" height="390"
+              clipPath={`url(#${p}ct)`}
+              filter={`url(#${p}fb)`}
+              preserveAspectRatio="xMidYMid meet" pointerEvents="none"/>
+
+            {/* ③ CUELLO */}
+            <image href={imgSrc} x="5" y="38" width="390" height="390"
+              clipPath={`url(#${p}cc)`}
+              filter={`url(#${p}fc)`}
+              preserveAspectRatio="xMidYMid meet" pointerEvents="none"/>
+
+            {/* Patrón de estilo sobre silueta del torso */}
+            {style !== "classic" && (
+              <path d={bodyOutline} fill={stylePatternFill} pointerEvents="none"/>
+            )}
+
+            {/* Costura central (sutil) */}
+            <line x1="200" y1={isBack ? 100 : 118} x2="200" y2="392"
+              stroke="white" strokeWidth="1.2" strokeOpacity="0.08"
+              strokeDasharray={isBack ? "none" : "7,5"} pointerEvents="none"/>
+
+            {/* Sponsor placeholder (solo frente) */}
+            {!isBack && (
+              <g pointerEvents="none" opacity="0.38">
+                <rect x="158" y="198" width="84" height="15" rx="2"
+                  fill="white" fillOpacity="0.05" stroke="white" strokeOpacity="0.15" strokeDasharray="3 3"/>
+                <text x="200" y="209" textAnchor="middle"
+                  fontFamily="JetBrains Mono, monospace" fontSize="8" letterSpacing="1.5"
+                  fill="white" fillOpacity="0.5">SPONSOR</text>
+              </g>
+            )}
+
+            {/* Texto SVG inline */}
+            {!isBack ? (
+              <g pointerEvents="none">
+                <text x="200" y="232" textAnchor="middle"
+                  fontFamily={jerseyFont} fontSize="26" letterSpacing="3"
+                  fill={textColor} style={{filter:"drop-shadow(0 1px 4px rgba(0,0,0,0.65))"}}>
+                  {(name||"").slice(0,14)}
+                </text>
+                <text x="200" y="310" textAnchor="middle"
+                  fontFamily={jerseyFont} fontSize="88"
+                  fill={textColor} style={{filter:"drop-shadow(0 2px 8px rgba(0,0,0,0.65))"}}>
+                  {number}
+                </text>
+              </g>
+            ) : (
+              <g pointerEvents="none">
+                <text x="200" y="193" textAnchor="middle"
+                  fontFamily={jerseyFont} fontSize="30" letterSpacing="4"
+                  fill={textColor} style={{filter:"drop-shadow(0 1px 4px rgba(0,0,0,0.65))"}}>
+                  {(name||"").slice(0,14)}
+                </text>
+                <text x="200" y="338" textAnchor="middle"
+                  fontFamily={jerseyFont} fontSize="118" letterSpacing="2"
+                  fill={textColor} style={{filter:"drop-shadow(0 4px 12px rgba(0,0,0,0.65))"}}>
+                  {number}
+                </text>
+              </g>
+            )}
+          </g>
+        </g>
+      </svg>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────
+   STYLE PREVIEW (miniatura en selector de estilo)
+──────────────────────────────────────────────────── */
+function StylePreview({ style, body }) {
+  if (style==="classic")      return <div style={{position:"absolute",inset:0,background:body}}/>;
+  if (style==="stripes-v")    return <div style={{position:"absolute",inset:0,background:`repeating-linear-gradient(90deg,${body} 0 4px,rgba(255,255,255,.18) 4px 8px)`}}/>;
+  if (style==="stripes-h")    return <div style={{position:"absolute",inset:0,background:`repeating-linear-gradient(0deg,${body} 0 4px,rgba(255,255,255,.18) 4px 8px)`}}/>;
+  if (style==="stripes-thin") return <div style={{position:"absolute",inset:0,background:`repeating-linear-gradient(90deg,${body} 0 6px,rgba(255,255,255,.22) 6px 8px)`}}/>;
+  if (style==="sash")         return <div style={{position:"absolute",inset:0,background:`linear-gradient(135deg,${body} 0 42%,rgba(255,255,255,.22) 42% 58%,${body} 58% 100%)`}}/>;
+  if (style==="gradient")     return <div style={{position:"absolute",inset:0,background:`linear-gradient(180deg,${body},rgba(0,0,0,.28))`}}/>;
+  return null;
+}
+
+/* ────────────────────────────────────────────────────
+   TOGGLE ROW (detalles avanzados)
+──────────────────────────────────────────────────── */
+function ToggleRow({ label, defaultOn }) {
+  const [on, setOn] = useState(defaultOn);
+  return (
+    <button onClick={()=>setOn(!on)} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 4px",color:"var(--ink-0)",fontSize:12.5,width:"100%"}}>
+      <span>{label}</span>
+      <span style={{width:32,height:18,borderRadius:999,background:on?"var(--accent)":"var(--bg-3)",border:"1px solid "+(on?"transparent":"var(--hair-strong)"),position:"relative",transition:"all .18s ease",display:"block",flexShrink:0}}>
+        <span style={{position:"absolute",top:1,left:on?15:1,width:14,height:14,borderRadius:"50%",background:on?"var(--accent-ink)":"var(--ink-1)",transition:"left .18s ease"}}/>
+      </span>
+    </button>
+  );
+}
+
+/* ────────────────────────────────────────────────────
+   SECTION (acordeón)
+──────────────────────────────────────────────────── */
+function Section({ num, label, summary, icon, open, onToggle, children }) {
+  return (
+    <div className="section" data-open={open}>
+      <button className="section-head" onClick={onToggle}>
+        <span className="step-num">0{num}</span>
+        <span style={{width:14,height:14,color:"var(--ink-2)",display:"grid",placeItems:"center"}}>{icon}</span>
+        <span className="label">{label}</span>
+        {summary && <span className="section-summary">{summary}</span>}
+        <span className="chev"><Icon.Chevron/></span>
+      </button>
+      <div className="section-body">{children}</div>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────
+   COLOR ROW
+──────────────────────────────────────────────────── */
+function ColorRow({ name, hex, onChange }) {
+  return (
+    <div className="color-row">
+      <div className="color-swatch" style={{background:hex}}>
+        <input type="color" value={hex} onChange={e=>onChange(e.target.value)}/>
+      </div>
+      <div className="color-meta">
+        <span className="name">{name}</span>
+        <span className="hex">{hex.toUpperCase()}</span>
+      </div>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────
+   SIDEBAR
+──────────────────────────────────────────────────── */
+function Sidebar({ design, dispatch, activeStep, setActiveStep, openSections, toggleSection }) {
+  const colorZones = [
+    { id:"body",    nm:"Cuerpo" },
+    { id:"sleeves", nm:"Mangas" },
+    { id:"collar",  nm:"Cuello" },
+    { id:"shorts",  nm:"Pantalón" },
+  ];
+  const activePresetIdx = PRESETS.findIndex(p =>
+    p.body.toLowerCase() === design.colors.body.toLowerCase() &&
+    p.sleeves.toLowerCase() === design.colors.sleeves.toLowerCase()
+  );
+  return (
+    <div className="sidebar-content">
+      <div className="stepper">
+        {["Color","Estilo","Texto","Tela"].map((s,i)=>(
+          <button key={s} className={"stepper-step "+(activeStep===i?"active":"")} onClick={()=>setActiveStep(i)}>{s}</button>
+        ))}
+      </div>
+
+      <Section num={1} label="Presets de equipo" icon={<Icon.Wand/>}
+               summary={activePresetIdx>=0?PRESETS[activePresetIdx].name:"Custom"}
+               open={openSections.presets} onToggle={()=>toggleSection("presets")}>
+        <div className="preset-grid">
+          {PRESETS.map((p,i)=>(
+            <button key={p.name} className={"preset "+(i===activePresetIdx?"active":"")} title={p.name}
+                    onClick={()=>dispatch({type:"APPLY_PRESET",preset:p})}>
+              <div className="preset-fill">
+                <div className="a" style={{background:p.body}}/>
+                <div className="b" style={{background:p.sleeves}}/>
+                <div className="c" style={{background:p.shorts}}/>
+              </div>
+              <span className="name">{p.name}</span>
+            </button>
+          ))}
+        </div>
+      </Section>
+
+      <Section num={2} label="Colores" icon={<Icon.Palette/>}
+               summary={design.colors.body.toUpperCase().slice(1)}
+               open={openSections.colors} onToggle={()=>toggleSection("colors")}>
+        {colorZones.map(z=>(
+          <ColorRow key={z.id} name={z.nm} hex={design.colors[z.id]}
+                    onChange={c=>dispatch({type:"SET_COLOR",zone:z.id,color:c})}/>
+        ))}
+      </Section>
+
+      <Section num={3} label="Estilo gráfico" icon={<Icon.Zap/>}
+               summary={STYLES.find(s=>s.id===design.style)?.name}
+               open={openSections.style} onToggle={()=>toggleSection("style")}>
+        <div className="chips">
+          {STYLES.map(s=>(
+            <button key={s.id} className={"chip "+(design.style===s.id?"active":"")}
+                    onClick={()=>dispatch({type:"SET",payload:{style:s.id}})}>
+              <div className="chip-thumb">
+                <StylePreview style={s.id} body={design.colors.body}/>
+              </div>
+              <span>{s.name}</span>
+            </button>
+          ))}
+        </div>
+      </Section>
+
+      <Section num={4} label="Nombre y número" icon={<Icon.Text/>}
+               summary={`${design.name} · ${design.number}`}
+               open={openSections.text} onToggle={()=>toggleSection("text")}>
+        <div className="field-row">
+          <div className="field">
+            <span className="lbl">Apellido</span>
+            <input className="input" maxLength="14" value={design.name}
+                   onChange={e=>dispatch({type:"SET",payload:{name:e.target.value.toUpperCase()}})}/>
+          </div>
+          <div className="field">
+            <span className="lbl">Número</span>
+            <input className="input center" maxLength="2" value={design.number}
+                   onChange={e=>dispatch({type:"SET",payload:{number:e.target.value.replace(/\D/g,"").slice(0,2)}})}/>
+          </div>
+        </div>
+        <div className="field">
+          <span className="lbl">Tipografía del dorsal</span>
+          <div className="typo-row">
+            {JERSEY_FONTS.map(f=>(
+              <button key={f.id} className={"typo-chip "+(design.jerseyFont===f.id?"active":"")}
+                      onClick={()=>dispatch({type:"SET",payload:{jerseyFont:f.id}})}>
+                <div className="glyph" style={{fontFamily:f.stack}}>{f.glyph}</div>
+                <div className="nm">{f.nm}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+        <ColorRow name="Color del texto" hex={design.textColor}
+                  onChange={c=>dispatch({type:"SET",payload:{textColor:c}})}/>
+      </Section>
+
+      <Section num={5} label="Tela y construcción" icon={<Icon.Fabric/>}
+               summary={FABRICS.find(f=>f.id===design.fabric)?.name}
+               open={openSections.fabric} onToggle={()=>toggleSection("fabric")}>
+        <div className="fabric-list">
+          {FABRICS.map(f=>(
+            <button key={f.id} className={"fabric "+(design.fabric===f.id?"active":"")}
+                    onClick={()=>dispatch({type:"SET",payload:{fabric:f.id}})}>
+              <div className="fabric-icon"/>
+              <div className="fabric-meta">
+                <div className="ttl">{f.name}</div>
+                <div className="sub">{f.sub}</div>
+              </div>
+              <div className="fabric-price">{f.price}</div>
+            </button>
+          ))}
+        </div>
+      </Section>
+
+      <Section num={6} label="Detalles avanzados" icon={<Icon.Sparkle/>}
+               summary="Opcional"
+               open={openSections.advanced} onToggle={()=>toggleSection("advanced")}>
+        <div style={{display:"flex",flexDirection:"column",gap:10}}>
+          <ToggleRow label="Bordes ribeteados"  defaultOn={true}/>
+          <ToggleRow label="Logo de manga"       defaultOn={false}/>
+          <ToggleRow label="Nombre interior"     defaultOn={true}/>
+          <ToggleRow label="Cuello reforzado"    defaultOn={false}/>
+        </div>
+      </Section>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────
+   CTA CARD (precio / talle / cantidad)
+──────────────────────────────────────────────────── */
+function useAnimatedNumber(target, duration=460) {
+  const [v, setV] = useState(target);
+  const fromRef = useRef(target);
+  useEffect(()=>{
+    const from = fromRef.current;
+    const start = performance.now();
+    let raf;
+    const tick = (now)=>{
+      const t = Math.min(1,(now-start)/duration);
+      const eased = 1-Math.pow(1-t,3);
+      setV(Math.round(from+(target-from)*eased));
+      if (t<1) raf=requestAnimationFrame(tick);
+      else fromRef.current=target;
+    };
+    raf=requestAnimationFrame(tick);
+    return ()=>cancelAnimationFrame(raf);
+  },[target,duration]);
+  return v;
+}
+
+function CTACard({ design, dispatch }) {
+  const fabricUp = {drypique:0,mesh:1500,sublim:3200,premium:5800}[design.fabric]||0;
+  const total = (24990+fabricUp)*design.qty;
+  const animated = useAnimatedNumber(total);
+  const parts = animated.toLocaleString("es-AR").split(",");
+  return (
+    <div className="cta-card">
+      <div className="row">
+        <div>
+          <div className="label">Tu diseño · {design.qty} unidad{design.qty>1?"es":""}</div>
+          <div className="price">$<span className="num">{parts[0]}</span>{parts[1]&&<span className="cents">,{parts[1]}</span>}</div>
+        </div>
+      </div>
+      <div className="size-row">
+        <span className="label">Talle</span>
+        <div className="size-segs">
+          {SIZES.map(s=>(
+            <button key={s} className={"size-seg "+(design.size===s?"active":"")}
+                    onClick={()=>dispatch({type:"SET",payload:{size:s}})}>
+              {s}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="qty-row">
+        <div className="qty-stepper">
+          <button onClick={()=>dispatch({type:"SET",payload:{qty:Math.max(1,design.qty-1)}})}><Icon.Minus/></button>
+          <span className="v">{design.qty}</span>
+          <button onClick={()=>dispatch({type:"SET",payload:{qty:Math.min(99,design.qty+1)}})}><Icon.Plus/></button>
+        </div>
+        <button className="size-pill">
+          <span>{FABRICS.find(f=>f.id===design.fabric)?.name}</span>
+          <Icon.Chevron/>
+        </button>
+      </div>
+      <button className="cta-btn"><Icon.Cart/> Agregar al carrito</button>
+      <div className="ship"><Icon.Truck/>Envío gratis · 7-10 días hábiles</div>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────
+   TOP BAR
+──────────────────────────────────────────────────── */
+function TopBar({ projectName, setProjectName, canUndo, canRedo, onUndo, onRedo, onDownload }) {
+  return (
+    <header className="topbar">
+      <div className="brand">
+        <div className="brand-mark">F</div>
+        <div style={{display:"flex",flexDirection:"column",lineHeight:1}}>
+          <span className="brand-name">FORMA</span>
+        </div>
+        <span className="brand-tag">Studio · v2</span>
+      </div>
+      <div className="project-meta">
+        <Icon.Sparkle/>
+        <input className="project-name" value={projectName} onChange={e=>setProjectName(e.target.value)}/>
+        <span className="project-sep">·</span>
+        <span className="project-status">En vivo</span>
+      </div>
+      <div className="top-spacer"/>
+      <div className="top-actions">
+        <button className="ico-btn" title="Deshacer (⌘Z)" disabled={!canUndo} onClick={onUndo}><Icon.Undo/></button>
+        <button className="ico-btn" title="Rehacer (⇧⌘Z)" disabled={!canRedo} onClick={onRedo}><Icon.Redo/></button>
+        <div className="top-divider"/>
+        <button className="ico-btn ico-search" title="Buscar"><Icon.Search/></button>
+        <button className="ico-btn ico-bell"   title="Notificaciones"><Icon.Bell/></button>
+        <div className="top-divider"/>
+        <button className="btn-ghost"><Icon.Save/><span className="btn-ghost-label">Guardar</span></button>
+        <button className="btn-ghost"><Icon.Share/><span className="btn-ghost-label">Compartir</span></button>
+        <button className="btn-primary" onClick={onDownload}><Icon.Download/><span className="btn-primary-label">Descargar</span></button>
+        <div className="top-divider"/>
+        <div className="avatar">JD</div>
+      </div>
+    </header>
+  );
+}
+
+/* ────────────────────────────────────────────────────
+   STAGE
+──────────────────────────────────────────────────── */
+// Dust particles — memoized so positions don't change on re-render
+const DUST = Array.from({length:18},()=>({
+  left:(Math.random()*100).toFixed(1)+"%",
+  bottom:(Math.random()*60).toFixed(1)+"%",
+  delay:(Math.random()*14).toFixed(1)+"s",
+  dur:(10+Math.random()*12).toFixed(1)+"s",
+}));
+
+function Stage({ design, dispatch, view, setView, zoom, setZoom, bg, favorites, setFavorites, jerseyFontStack, svgDownloadRef }) {
+  const colors = design.colors;
+  const stageRef = useRef(null);
+  const [animKey, setAnimKey] = useState(0);
+  const prevView = useRef(view);
+
+  // cursor-reactive lighting
+  useEffect(()=>{
+    const el = stageRef.current;
+    if (!el) return;
+    let raf=0;
+    let tx=50, ty=45;
+    const onMove=(e)=>{
+      const r = el.getBoundingClientRect();
+      tx = ((e.clientX-r.left)/r.width)*100;
+      ty = ((e.clientY-r.top)/r.height)*100;
+      if (!raf) raf=requestAnimationFrame(apply);
+    };
+    const onLeave=()=>{ tx=50; ty=45; if (!raf) raf=requestAnimationFrame(apply); };
+    const apply=()=>{ raf=0; el.style.setProperty("--cx",tx.toFixed(1)+"%"); el.style.setProperty("--cy",ty.toFixed(1)+"%"); };
+    el.addEventListener("mousemove",onMove);
+    el.addEventListener("mouseleave",onLeave);
+    return ()=>{ el.removeEventListener("mousemove",onMove); el.removeEventListener("mouseleave",onLeave); if (raf) cancelAnimationFrame(raf); };
+  },[]);
+
+  useEffect(()=>{
+    if (prevView.current!==view) { setAnimKey(k=>k+1); prevView.current=view; }
+  },[view]);
+
+  const isCurrentFav = favorites.some(f=>JSON.stringify(f.design)===JSON.stringify(design));
+
+  const jerseyProps = { colors, style:design.style, name:design.name, number:design.number, textColor:design.textColor, jerseyFont:jerseyFontStack };
+
+  return (
+    <div className="stage" data-bg={bg} ref={(node)=>{ stageRef.current=node; if(svgDownloadRef) svgDownloadRef.current=node; }}>
+      <div className="stage-floor"/>
+      <div className="stage-dust">
+        {DUST.map((d,i)=>(
+          <span key={i} style={{left:d.left,bottom:d.bottom,animationDelay:d.delay,animationDuration:d.dur}}/>
+        ))}
+      </div>
+
+      {/* Corner readouts */}
+      <div className="corner tl"><span className="dot"/><span>Live</span></div>
+      <div className="corner tr"><span className="v">2K</span><span>· PBR</span></div>
+
+      {/* Badges */}
+      <div className="badges">
+        <span className="badge"><span className="b-dot"/>Made-to-order</span>
+        <span className="badge">{FABRICS.find(f=>f.id===design.fabric)?.name}</span>
+        <span className="badge">7–10 días</span>
+      </div>
+
+      {/* View toggle */}
+      <div className="view-toggle">
+        <button className={view==="front"?"active":""} onClick={()=>setView("front")}><Icon.Front/>Frente</button>
+        <button className={view==="back" ?"active":""} onClick={()=>setView("back")} ><Icon.Back/> Dorso</button>
+        <button className={view==="both" ?"active":""} onClick={()=>setView("both")} ><Icon.Both/> Comparar</button>
+      </div>
+
+      {/* Canvas */}
+      <div className="canvas-wrap">
+        <div className="canvas-shelf">
+          {view==="both" ? (
+            <>
+              <div key={"cf"+animKey} className="canvas-cell compare anim-enter" style={{"--zoom":zoom/100}}>
+                <div className="flip-wrap"><Jersey view="front" idPrefix="cmp-f" {...jerseyProps}/></div>
+                <div className="jersey-cap"><span className="hair"/>Frente<span className="hair"/></div>
+              </div>
+              <div key={"cb"+animKey} className="canvas-cell compare anim-enter" style={{"--zoom":zoom/100,animationDelay:"80ms"}}>
+                <div className="flip-wrap"><Jersey view="back" idPrefix="cmp-b" {...jerseyProps}/></div>
+                <div className="jersey-cap"><span className="hair"/>Dorso<span className="hair"/></div>
+              </div>
+            </>
+          ) : (
+            <div key={"v"+view+animKey} className="canvas-cell anim-enter" style={{"--zoom":zoom/100}}>
+              <div className="flip-wrap">
+                <Jersey view={view} idPrefix={"j-"+(view==="back"?"b":"f")} {...jerseyProps} data-download-target="true"/>
+              </div>
+              <div className="jersey-cap">
+                <span className="hair"/>{view==="back"?"Vista dorso":"Vista frente"} · 1:1<span className="hair"/>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Favorites strip */}
+      <div className="favorites">
+        {favorites.map((f,i)=>(
+          <div key={i} className={"fav-card "+(JSON.stringify(f.design)===JSON.stringify(design)?"active":"")}
+               onClick={()=>dispatch({type:"REPLACE",design:f.design})} title={f.name}>
+            <div className="fav-mini" style={{background:`linear-gradient(180deg,${f.design.colors.body} 0 60%,${f.design.colors.shorts} 60% 100%)`}}>
+              <div style={{position:"absolute",left:4,right:4,top:"58%",height:3,background:f.design.colors.sleeves,borderRadius:1}}/>
+              <div style={{position:"absolute",top:22,left:"50%",transform:"translateX(-50%)",fontFamily:'"Bebas Neue",sans-serif',fontSize:13,color:f.design.textColor,lineHeight:1}}>{f.design.number}</div>
+            </div>
+          </div>
+        ))}
+        <button className="fav-add" title={isCurrentFav?"Ya guardado":"Guardar diseño"}
+                onClick={()=>{ if (!isCurrentFav) setFavorites([...favorites,{name:`${design.name} ${design.number}`,design}].slice(-6)); }}>
+          {isCurrentFav?<Icon.HeartFill/>:<Icon.Plus/>}
+        </button>
+      </div>
+
+      {/* Floating toolbar */}
+      <div className="floating-toolbar">
+        <button className="tool" title="Zoom out" onClick={()=>setZoom(Math.max(40,zoom-10))}><Icon.Minus/></button>
+        <span className="zoom num">{zoom}%</span>
+        <button className="tool" title="Zoom in"  onClick={()=>setZoom(Math.min(200,zoom+10))}><Icon.Plus/></button>
+        <div className="ft-sep"/>
+        <button className="tool" title="100%" onClick={()=>setZoom(100)}><Icon.Eye/></button>
+        <button className="tool" title="Pantalla completa" onClick={()=>document.documentElement.requestFullscreen?.()}><Icon.Maximize/></button>
+      </div>
+
+      {/* Hotkeys hint */}
+      <div className="hotkeys">
+        <span className="k"><span className="kbd">F</span>Frente</span>
+        <span className="k"><span className="kbd">B</span>Dorso</span>
+        <span className="k"><span className="kbd">C</span>Comparar</span>
+        <span className="k"><span className="kbd">⌘Z</span>Deshacer</span>
+      </div>
+
+      <CTACard design={design} dispatch={dispatch}/>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────
+   DOWNLOAD — serializa el SVG de la camiseta a PNG
+──────────────────────────────────────────────────── */
+function downloadJersey(view, design, jerseyFontStack) {
+  // Encuentra el SVG del jersey activo
+  const selector = view === "back" ? '[id^="j-b-shadow"]' : '[id^="j-f-shadow"]';
+  let svg = document.querySelector(selector)?.closest("svg");
+  if (!svg) svg = document.querySelector(".canvas-cell:not(.compare) .jersey-stage svg");
+  if (!svg) { alert("No se encontró la camiseta para exportar."); return; }
+
+  const W=400, H=480;
+  const clone = svg.cloneNode(true);
+  clone.setAttribute("xmlns","http://www.w3.org/2000/svg");
+  clone.setAttribute("width", W);
+  clone.setAttribute("height", H);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = W*2; canvas.height = H*2;
+  const ctx = canvas.getContext("2d");
+  ctx.scale(2,2);
+
+  const svgStr = new XMLSerializer().serializeToString(clone);
+  const blob = new Blob([svgStr],{type:"image/svg+xml;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const img = new Image();
+
+  img.onload = ()=>{
+    ctx.drawImage(img,0,0,W,H);
+    URL.revokeObjectURL(url);
+    const a = document.createElement("a");
+    a.download = `camiseta-${view === "back" ? "dorso" : "frente"}.png`;
+    a.href = canvas.toDataURL("image/png");
+    a.click();
+  };
+  img.onerror = ()=>{
+    // Fallback: descargar como SVG
+    const a = document.createElement("a");
+    a.download = `camiseta-${view === "back" ? "dorso" : "frente"}.svg`;
+    a.href = url;
+    a.click();
+  };
+  img.src = url;
+}
+
+/* ────────────────────────────────────────────────────
+   APP ROOT
+──────────────────────────────────────────────────── */
+function App() {
+  const [state, dispatch] = useReducer(designReducer, {past:[],present:INITIAL_DESIGN,future:[]});
+  const design = state.present;
+
+  const [projectName, setProjectName] = useState("Talleres Sub-15 · Edición 2026");
+  const [view, setView]     = useState("front");
+  const [zoom, setZoom]     = useState(100);
+  const [collapsed, setCollapsed] = useState(false);
+  const [activeStep, setActiveStep] = useState(0);
+  const [bg] = useState("studio");
+  const [openSections, setOpenSections] = useState({
+    presets:true, colors:true, style:true, text:true, fabric:false, advanced:false
+  });
+  const [favorites, setFavorites] = useState(()=>{
+    try { return JSON.parse(localStorage.getItem("forma:favs")||"null")||DEFAULT_FAVS; }
+    catch { return DEFAULT_FAVS; }
+  });
+
+  useEffect(()=>{ localStorage.setItem("forma:favs",JSON.stringify(favorites)); },[favorites]);
+
+  // Keyboard shortcuts
+  useEffect(()=>{
+    const onKey=(e)=>{
+      if (e.target&&(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA")) return;
+      const mod = e.metaKey||e.ctrlKey;
+      if (mod&&e.key.toLowerCase()==="z"&&!e.shiftKey) { e.preventDefault(); dispatch({type:"UNDO"}); return; }
+      if (mod&&(e.key.toLowerCase()==="y"||(e.shiftKey&&e.key.toLowerCase()==="z"))) { e.preventDefault(); dispatch({type:"REDO"}); return; }
+      if (e.key.toLowerCase()==="f") setView("front");
+      else if (e.key.toLowerCase()==="b") setView("back");
+      else if (e.key.toLowerCase()==="c") setView("both");
+    };
+    window.addEventListener("keydown",onKey);
+    return ()=>window.removeEventListener("keydown",onKey);
+  },[]);
+
+  const toggleSection = key => setOpenSections(o=>({...o,[key]:!o[key]}));
+  const jerseyFontStack = JERSEY_FONTS.find(f=>f.id===design.jerseyFont)?.stack||JERSEY_FONTS[0].stack;
+  const svgDownloadRef = useRef(null);
+
+  const handleDownload = ()=>downloadJersey(view, design, jerseyFontStack);
+
+  return (
+    <div className="app" data-sidebar-collapsed={collapsed}>
+      <TopBar
+        projectName={projectName} setProjectName={setProjectName}
+        canUndo={state.past.length>0} canRedo={state.future.length>0}
+        onUndo={()=>dispatch({type:"UNDO"})} onRedo={()=>dispatch({type:"REDO"})}
+        onDownload={handleDownload}
+      />
+      <aside className="sidebar">
+        <button className="sidebar-collapse" title={collapsed?"Expandir":"Colapsar"} onClick={()=>setCollapsed(c=>!c)}>
+          {collapsed?<Icon.ChevronRight/>:<Icon.ChevronLeft/>}
+        </button>
+        <Sidebar design={design} dispatch={dispatch}
+                 activeStep={activeStep} setActiveStep={setActiveStep}
+                 openSections={openSections} toggleSection={toggleSection}/>
+        <div className="sidebar-rail">
+          <button title="Presets"><Icon.Wand/></button>
+          <button title="Colores"><Icon.Palette/></button>
+          <button title="Estilo"><Icon.Zap/></button>
+          <button title="Texto"><Icon.Text/></button>
+          <button title="Tela"><Icon.Fabric/></button>
+          <button title="Avanzado"><Icon.Sparkle/></button>
+        </div>
+      </aside>
+      <Stage
+        design={design} dispatch={dispatch}
+        view={view} setView={setView}
+        zoom={zoom} setZoom={setZoom}
+        bg={bg}
+        jerseyFontStack={jerseyFontStack}
+        favorites={favorites} setFavorites={setFavorites}
+        svgDownloadRef={svgDownloadRef}
+      />
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
