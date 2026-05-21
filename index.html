@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FORMA — Custom Kit Studio</title>
+<title>Will Sports — Custom Kit Studio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
@@ -14,9 +14,9 @@
     --bg-glass:rgba(20,20,27,.55); --bg-glass-strong:rgba(20,20,27,.78);
     --hair:rgba(255,255,255,.06); --hair-strong:rgba(255,255,255,.11); --hair-bright:rgba(255,255,255,.18);
     --ink-0:#f4f4f0; --ink-1:rgba(244,244,240,.62); --ink-2:rgba(244,244,240,.42); --ink-3:rgba(244,244,240,.24);
-    --accent:oklch(0.82 0.2 138); --accent-deep:oklch(0.62 0.18 138);
-    --accent-glow:oklch(0.82 0.2 138/.22); --accent-glow-strong:oklch(0.82 0.2 138/.45);
-    --accent-ink:#0a0e07;
+    --accent:#6ABBE0; --accent-deep:#4A9FC4;
+    --accent-glow:rgba(106,187,224,.22); --accent-glow-strong:rgba(106,187,224,.45);
+    --accent-ink:#0a1a2e;
     --r-xs:6px; --r-sm:8px; --r-md:12px; --r-lg:16px; --r-xl:22px; --r-pill:999px;
     --f-ui:'Space Grotesk',ui-sans-serif,system-ui,sans-serif;
     --f-mono:'JetBrains Mono',ui-monospace,monospace;
@@ -314,7 +314,7 @@
   .fav-add { width:56px; height:56px; border-radius:10px; background:var(--bg-glass); backdrop-filter:blur(20px); border:1px dashed var(--hair-strong); color:var(--ink-2); cursor:pointer; display:grid; place-items:center; transition:all .15s ease; }
   .fav-add:hover { border-color:var(--hair-bright); color:var(--ink-0); }
   .cta-card {
-    position:absolute; bottom:22px; right:22px; width:290px;
+    position:absolute; bottom:22px; right:90px; width:290px;
     background:var(--bg-glass-strong); backdrop-filter:blur(var(--blur-3)) saturate(160%); -webkit-backdrop-filter:blur(var(--blur-3)) saturate(160%);
     border:1px solid var(--hair-strong); border-radius:var(--r-lg); box-shadow:var(--sh-glass); padding:16px 18px; z-index:6;
   }
@@ -349,6 +349,7 @@
   @keyframes shine { 0%,60%{left:-120%} 100%{left:220%} }
   .cta-card .cta-btn:hover { transform:translateY(-2px) scale(1.015); box-shadow:0 1px 0 rgba(255,255,255,.3) inset,0 0 0 1px rgba(0,0,0,.18) inset,0 18px 40px var(--accent-glow-strong); }
   .cta-card .cta-btn:active { transform:translateY(-1px) scale(1); }
+  .cta-card .cta-btn svg { width:16px; height:16px; stroke-width:2; flex-shrink:0; }
   .cta-card .ship { margin-top:9px; font-family:var(--f-mono); font-size:9.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2); display:flex; align-items:center; gap:6px; }
   .cta-card .ship svg { width:11px; height:11px; color:var(--accent); }
   .badges { position:absolute; top:50px; right:22px; display:flex; gap:6px; z-index:5; }
@@ -572,6 +573,11 @@ function Jersey({ view="front", colors, style, idPrefix, name, number, textColor
             <path d={clipCollar}/>
           </clipPath>
 
+          {/* Máscara basada en alpha del PNG para el patrón de estilo */}
+          <mask id={p+"pm"} style={{maskType:"alpha"}}>
+            <image href={imgSrc} x="5" y="38" width="390" height="390" preserveAspectRatio="xMidYMid meet"/>
+          </mask>
+
           {/* Shorts shading */}
           <radialGradient id={p+"shao"} cx="50%" cy="20%" r="90%">
             <stop offset="0%"   stopColor="white"/>
@@ -604,18 +610,8 @@ function Jersey({ view="front", colors, style, idPrefix, name, number, textColor
         </defs>
 
         {/* Sombra de piso */}
-        <ellipse cx="200" cy="458" rx="140" ry="15" fill="black" fillOpacity="0.45" filter={`url(#${p}blur-md)`}/>
-
         <g filter={`url(#${p}shadow)`}>
           <g style={{isolation:"isolate"}}>
-
-            {/* Pantalón / Shorts (rectángulo sintético debajo de la camiseta) */}
-            <rect x="98" y="392" width="204" height="68" rx="5" fill={colors.shorts}/>
-            <g style={{mixBlendMode:"multiply", pointerEvents:"none"}}>
-              <rect x="98" y="392" width="204" height="68" rx="5" fill={`url(#${p}shao)`}/>
-            </g>
-            <line x1="200" y1="392" x2="200" y2="460" stroke="white" strokeWidth="1.2" strokeOpacity="0.12" pointerEvents="none"/>
-            <rect x="98" y="392" width="204" height="3" fill="black" fillOpacity="0.18" pointerEvents="none"/>
 
             {/* ① MANGAS — PNG completo sin clip (alpha define forma de las mangas) */}
             <image href={imgSrc} x="5" y="38" width="390" height="390"
@@ -634,38 +630,19 @@ function Jersey({ view="front", colors, style, idPrefix, name, number, textColor
               filter={`url(#${p}fc)`}
               preserveAspectRatio="xMidYMid meet" pointerEvents="none"/>
 
-            {/* Patrón de estilo sobre silueta del torso */}
+            {/* Patrón de estilo — recorte por alpha del PNG */}
             {style !== "classic" && (
-              <path d={bodyOutline} fill={stylePatternFill} pointerEvents="none"/>
+              <rect x="5" y="38" width="390" height="390" fill={stylePatternFill} mask={`url(#${p}pm)`} pointerEvents="none"/>
             )}
 
-            {/* Costura central (sutil) */}
-            <line x1="200" y1={isBack ? 100 : 118} x2="200" y2="392"
-              stroke="white" strokeWidth="1.2" strokeOpacity="0.08"
-              strokeDasharray={isBack ? "none" : "7,5"} pointerEvents="none"/>
 
-            {/* Sponsor placeholder (solo frente) */}
-            {!isBack && (
-              <g pointerEvents="none" opacity="0.38">
-                <rect x="158" y="198" width="84" height="15" rx="2"
-                  fill="white" fillOpacity="0.05" stroke="white" strokeOpacity="0.15" strokeDasharray="3 3"/>
-                <text x="200" y="209" textAnchor="middle"
-                  fontFamily="JetBrains Mono, monospace" fontSize="8" letterSpacing="1.5"
-                  fill="white" fillOpacity="0.5">SPONSOR</text>
-              </g>
-            )}
 
             {/* Texto SVG inline */}
             {!isBack ? (
               <g pointerEvents="none">
-                <text x="200" y="232" textAnchor="middle"
-                  fontFamily={jerseyFont} fontSize="26" letterSpacing="3"
+                <text x="242" y="192" textAnchor="middle"
+                  fontFamily={jerseyFont} fontSize="28" letterSpacing="2"
                   fill={textColor} style={{filter:"drop-shadow(0 1px 4px rgba(0,0,0,0.65))"}}>
-                  {(name||"").slice(0,14)}
-                </text>
-                <text x="200" y="310" textAnchor="middle"
-                  fontFamily={jerseyFont} fontSize="88"
-                  fill={textColor} style={{filter:"drop-shadow(0 2px 8px rgba(0,0,0,0.65))"}}>
                   {number}
                 </text>
               </g>
@@ -676,7 +653,7 @@ function Jersey({ view="front", colors, style, idPrefix, name, number, textColor
                   fill={textColor} style={{filter:"drop-shadow(0 1px 4px rgba(0,0,0,0.65))"}}>
                   {(name||"").slice(0,14)}
                 </text>
-                <text x="200" y="338" textAnchor="middle"
+                <text x="200" y="290" textAnchor="middle"
                   fontFamily={jerseyFont} fontSize="118" letterSpacing="2"
                   fill={textColor} style={{filter:"drop-shadow(0 4px 12px rgba(0,0,0,0.65))"}}>
                   {number}
@@ -934,9 +911,8 @@ function CTACard({ design, dispatch }) {
           <span className="v">{design.qty}</span>
           <button onClick={()=>dispatch({type:"SET",payload:{qty:Math.min(99,design.qty+1)}})}><Icon.Plus/></button>
         </div>
-        <button className="size-pill">
+        <button className="size-pill" style={{justifyContent:"center"}}>
           <span>{FABRICS.find(f=>f.id===design.fabric)?.name}</span>
-          <Icon.Chevron/>
         </button>
       </div>
       <button className="cta-btn"><Icon.Cart/> Agregar al carrito</button>
@@ -952,9 +928,9 @@ function TopBar({ projectName, setProjectName, canUndo, canRedo, onUndo, onRedo,
   return (
     <header className="topbar">
       <div className="brand">
-        <div className="brand-mark">F</div>
+        <div className="brand-mark" style={{background:"linear-gradient(135deg,#172A46,#1B3560)",color:"#6ABBE0"}}>W</div>
         <div style={{display:"flex",flexDirection:"column",lineHeight:1}}>
-          <span className="brand-name">FORMA</span>
+          <span className="brand-name">WILL SPORTS</span>
         </div>
         <span className="brand-tag">Studio · v2</span>
       </div>
